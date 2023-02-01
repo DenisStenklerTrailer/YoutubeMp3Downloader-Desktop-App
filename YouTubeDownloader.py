@@ -7,36 +7,46 @@ import errno
 label1 = sg.Text("Enter a download link: ")
 input1 = sg.Input(key="link")
 # row 2:
+label2 = sg.Text("Enter a dist directory: ")
 input2 = sg.Input()
 choose_button2 = sg.FolderBrowse("Choose",key="folder")
 
 compress_button = sg.Button("Download")
+exit_button = sg.Button("Exit")
 
 complete_label = sg.Text("", key="output")
 
-window = sg.Window("YouTube MP3 downloader", layout=[[label1, input1],[input2, choose_button2],[compress_button, complete_label]], element_justification="center")
+window = sg.Window("YouTube MP3 downloader", layout=[[label1, input1],[label2, input2, choose_button2],[compress_button, complete_label],[exit_button]], element_justification="center")
 
 
 while True:
 
     event, values = window.read()
-    link = str(values["link"])
 
-    folder = values["folder"]
+    if event == "Download":
+        link = str(values["link"])
 
-    yt = YouTube.YouTube(link)
+        folder = values["folder"]
 
-    t = yt.streams.filter(only_audio=True).first()
+        yt = YouTube.YouTube(link)
 
-    out_file = t.download(output_path=folder)
+        t = yt.streams.filter(only_audio=True).first()
 
-    base, ext = os.path.splitext(out_file)
-    new_file = base + '.mp3'
+        out_file = t.download(output_path=folder)
 
-    try:
-        os.rename(out_file, new_file)
-        window["output"].update(f"{t.title} has been downloaded sucessfully!")
-    except FileExistsError:
-        window["output"].update("File already exists!")
+        base, ext = os.path.splitext(out_file)
+        new_file = base + '.mp3'
+
+        try:
+            os.rename(out_file, new_file)
+            window["output"].update(f"{t.title} has been downloaded sucessfully!")
+        except FileExistsError:
+            window["output"].update("File already exists!")
+
+    if event == "Exit":
+        break
+    elif sg.WIN_CLOSED == event:
+        # print(event)
+        break
 
 window.close()
